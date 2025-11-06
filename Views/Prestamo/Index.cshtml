@@ -1,0 +1,80 @@
+﻿@model IEnumerable<NotebookApp.Models.Prestamo>
+
+@{
+    ViewData["Title"] = "Listado de Préstamos";
+}
+
+<h2>Listado de Préstamos</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Registrar Nuevo Préstamo</a>
+</p>
+
+<table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Profesor</th>
+            <th>DNI</th>
+            <th>Fecha Salida</th>
+            <th>Fecha Devolución</th>
+            <th>Equipos</th>
+            <th>Estado</th>
+            <th style="width: 140px;">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prestamo in Model)
+        {
+            var devuelto = prestamo.FechaEntrada != null;
+            <tr>
+                <td>@prestamo.PrestamoId</td>
+                <td>@($"{prestamo.Profesor?.Nombre} {prestamo.Profesor?.Apellido}")</td>
+                <td>@prestamo.Profesor?.Dni</td>
+                <td>@prestamo.FechaSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    @if (prestamo.FechaEntrada != null)
+                    {
+                        @prestamo.FechaEntrada?.ToString("dd/MM/yyyy HH:mm")
+                    }
+                    else
+                    {
+                        <span class="text-muted">Pendiente</span>
+                    }
+                </td>
+                <td>
+                    @if (prestamo.PrestamoDetalles != null && prestamo.PrestamoDetalles.Any())
+                    {
+                        <ul class="list-unstyled">
+                            @foreach (var detalle in prestamo.PrestamoDetalles)
+                            {
+                                <li>@detalle.Equipo?.NumeroInventario - @detalle.Equipo?.Marca @detalle.Equipo?.Modelo</li>
+                            }
+                        </ul>
+                    }
+                </td>
+                <td>
+                    @if (devuelto)
+                    {
+                        <span class="badge bg-success">Devuelto</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Activo</span>
+                    }
+                </td>
+                <td>
+
+                    @if (!devuelto)
+                    {
+                        <a asp-action="Restore" asp-route-id="@prestamo.PrestamoId" class="btn btn-sm btn-success">Devolver</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

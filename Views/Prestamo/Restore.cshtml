@@ -1,0 +1,66 @@
+﻿@model NotebookApp.Models.Prestamo
+
+<h2>Registrar Devolución</h2>
+
+@if (Model != null)
+{
+    <div class="card shadow p-4">
+        <h4>Datos del Profesor</h4>
+        <p>
+            <strong>Nombre:</strong> @Model.Profesor.Nombre @Model.Profesor.Apellido <br />
+            <strong>DNI:</strong> @Model.Profesor.Dni
+        </p>
+
+        <hr />
+
+        <h4>Datos del Préstamo</h4>
+        <p>
+            <strong>Fecha de salida:</strong> @Model.FechaSalida.ToString("dd/MM/yyyy HH:mm") <br />
+            <strong>Fecha de devolución:</strong>
+            @if (Model.FechaEntrada == null)
+            {
+                <span class="text-muted">Pendiente</span>
+            }
+            else
+            {
+                @Model.FechaEntrada?.ToString("dd/MM/yyyy HH:mm")
+            }
+        </p>
+
+        <hr />
+
+        <h4>Equipos retirados</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>N° Inventario</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detalle in Model.PrestamoDetalles)
+                {
+                    <tr>
+                        <td>@detalle.Equipo.NumeroInventario</td>
+                        <td>@detalle.Equipo.Marca</td>
+                        <td>@detalle.Equipo.Modelo</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <form asp-action="Restore" method="post">
+            <input type="hidden" asp-for="PrestamoId" />
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success">Confirmar Devolución</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+}
+else
+{
+    <p class="text-danger">No se encontró el préstamo.</p>
+}
+

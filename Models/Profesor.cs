@@ -12,7 +12,7 @@ public partial class Profesor
 
     public string Apellido { get; set; } = null!;
 
-    public string? Dni { get; set; }
+    public string Dni { get; set; } = null!;
 
     public virtual ICollection<Prestamo> Prestamos { get; set; } = new List<Prestamo>();
 }

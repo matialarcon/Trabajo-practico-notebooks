@@ -1,0 +1,54 @@
+﻿@model IEnumerable<NotebookApp.Models.Profesor>
+
+@{
+    ViewData["Title"] = "Index";
+    var permitirEliminar = (Dictionary<int, bool>)ViewBag.PermitirEliminar;
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Apellido)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Dni)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Apellido)
+            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Dni)
+                </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ProfesorId">Edit</a> |
+                @if (permitirEliminar[item.ProfesorId] == false)
+                {
+                    <a asp-action="Delete" asp-route-id="@item.ProfesorId" class="btn btn-danger btn-sm">Eliminar</a>
+                }
+                else
+                {
+                    <span class="text-muted">-</span>
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

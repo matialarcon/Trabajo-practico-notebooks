@@ -11,6 +11,8 @@ public partial class PrestamoDetalle
 
     public int EquipoId { get; set; }
 
+    public bool Devuelto { get; set; } = false;
+
     public virtual Equipo Equipo { get; set; } = null!;
 
     public virtual Prestamo Prestamo { get; set; } = null!;

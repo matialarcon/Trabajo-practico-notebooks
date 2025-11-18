@@ -1,14 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NotebookApp.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NotebookApp.Controllers
 {
+    [Authorize]
     public class PrestamoController : Controller
     {
         private readonly NotebooksContext _context;
@@ -29,13 +31,32 @@ namespace NotebookApp.Controllers
         }
 
         // GET: Prestamo/Create
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(string? dni)
         {
-            ViewBag.equiposDisponibles = await _context.Equipos
-               .Where(e => e.Disponibilidad)
-               .ToListAsync();
+            ViewBag.EquiposDisponibles = await _context.Equipos
+                .Where(e => e.Disponibilidad)
+                .ToListAsync();
 
-            return View();
+            var prestamo = new Prestamo();
+
+            if (!string.IsNullOrEmpty(dni))
+            {
+                var profesor = await _context.Profesores.FirstOrDefaultAsync(p => p.Dni == dni);
+
+                if (profesor != null)
+                {
+                    prestamo.Profesor = profesor;
+                    ViewBag.ProfesorEncontrado = true;
+                    ViewBag.Mensaje = $"Profesor encontrado: {profesor.Nombre} {profesor.Apellido}";
+                }
+                else
+                {
+                    ViewBag.ProfesorEncontrado = false;
+                    ViewBag.Mensaje = "❌ No se encontró un profesor con ese DNI.";
+                }
+            }
+
+            return View(prestamo);
         }
 
         // POST: Prestamo/Create
@@ -45,84 +66,74 @@ namespace NotebookApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Prestamo prestamo, List<int> equiposSeleccionados)
         {
+
             if (equiposSeleccionados == null || !equiposSeleccionados.Any())
             {
-                ModelState.AddModelError("", "Debe seleccionar al menos un equipo.");
+                ModelState.AddModelError("", "No se selecciono ningun equipo");
+                ViewBag.Mensaje = "❌ No se selecciono ningun equipo.";
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                // Buscar profesor por DNI
                 var profesorExistente = await _context.Profesores
                     .FirstOrDefaultAsync(p => p.Dni == prestamo.Profesor.Dni);
 
-                if (profesorExistente != null)
+                if (profesorExistente == null)
                 {
-                    prestamo.ProfesorId = profesorExistente.ProfesorId;
-                    prestamo.Profesor = profesorExistente;
+                    ModelState.AddModelError("", "El profesor ingresado no existe. No se puede registrar el préstamo.");
                 }
                 else
                 {
-                    // Crear nuevo profesor
-                    var nuevoProfesor = new Profesor
+                    if (ModelState.IsValid)
                     {
-                        Nombre = prestamo.Profesor.Nombre,
-                        Apellido = prestamo.Profesor.Apellido,
-                        Dni = prestamo.Profesor.Dni
-                    };
+                        prestamo.ProfesorId = profesorExistente.ProfesorId;
+                        prestamo.Profesor = profesorExistente;
+                        prestamo.FechaSalida = DateTime.Now;
 
-                    _context.Profesores.Add(nuevoProfesor);
-                    await _context.SaveChangesAsync();
+                        _context.Prestamos.Add(prestamo);
+                        await _context.SaveChangesAsync();
 
-                    prestamo.ProfesorId = nuevoProfesor.ProfesorId;
-                    prestamo.Profesor = nuevoProfesor;
-                }
+                        foreach (var idEquipo in equiposSeleccionados)
+                        {
+                            var detalle = new PrestamoDetalle
+                            {
+                                PrestamoId = prestamo.PrestamoId,
+                                EquipoId = idEquipo
+                            };
+                            _context.PrestamoDetalles.Add(detalle);
 
-                prestamo.FechaSalida = DateTime.Now;
-                _context.Prestamos.Add(prestamo);
-                await _context.SaveChangesAsync();
-                foreach (var (idEquipo, detalle) in
-                // Agregar detalles del préstamo
-                from idEquipo in equiposSeleccionados
-                let detalle = new PrestamoDetalle
-                {
-                    PrestamoId = prestamo.PrestamoId,
-                    EquipoId = idEquipo
-                }
-                select (idEquipo, detalle))
-                {
-                    _context.PrestamoDetalles.Add(detalle);
-                    // Marcar equipo como no disponible
-                    var equipo = await _context.Equipos.FindAsync(idEquipo);
-                    if (equipo != null)
-                    {
-                        equipo.Disponibilidad = false;
-                        _context.Update(equipo);
+                            var equipo = await _context.Equipos.FindAsync(idEquipo);
+                            if (equipo != null)
+                            {
+                                equipo.Disponibilidad = false;
+                                _context.Update(equipo);
+                            }
+                        }
+
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index));
                     }
                 }
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
             }
-
-            ViewBag.EquiposDisponibles = await _context.Equipos
-                .Where(e => e.Disponibilidad)
-                .ToListAsync();
 
             return View(prestamo);
         }
 
         // GET: Prestamos/Restore/5
-        public async Task<IActionResult> Restore(int id)
+        public async Task<IActionResult> Restore(int? id)
         {
+            if (id == null) return NotFound();
+
             var prestamo = await _context.Prestamos
                 .Include(p => p.Profesor)
                 .Include(p => p.PrestamoDetalles)
                     .ThenInclude(d => d.Equipo)
                 .FirstOrDefaultAsync(p => p.PrestamoId == id);
 
-            if (prestamo == null)
-                return NotFound();
+            if (prestamo == null) return NotFound();
+
+            prestamo.PrestamoDetalles = prestamo.PrestamoDetalles
+                .Where(d => !d.Devuelto)
+                .ToList();
 
             return View(prestamo);
         }
@@ -130,27 +141,34 @@ namespace NotebookApp.Controllers
         // POST: Prestamos/Restore
         [HttpPost, ActionName("Restore")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RestoreConfirmed(int id)
+        public async Task<IActionResult> Restore(int PrestamoId, int[]? equiposSeleccionados)
         {
             var prestamo = await _context.Prestamos
                 .Include(p => p.PrestamoDetalles)
-                .FirstOrDefaultAsync(p => p.PrestamoId == id);
+                    .ThenInclude(d => d.Equipo)
+                .FirstOrDefaultAsync(p => p.PrestamoId == PrestamoId);
 
             if (prestamo == null)
                 return NotFound();
 
-            prestamo.FechaEntrada = DateTime.Now;
-            _context.Update(prestamo);
+            if (equiposSeleccionados == null || equiposSeleccionados.Length == 0)
+            {
+                TempData["Error"] = "Debe seleccionar al menos un equipo para devolver.";
+                return RedirectToAction(nameof(Restore), new { id = PrestamoId });
+            }
 
-            // Marcar los equipos como disponibles
             foreach (var detalle in prestamo.PrestamoDetalles)
             {
-                var equipo = await _context.Equipos.FindAsync(detalle.EquipoId);
-                if (equipo != null)
+                if (equiposSeleccionados.Contains(detalle.EquipoId))
                 {
-                    equipo.Disponibilidad = true;
-                    _context.Update(equipo);
+                    detalle.Devuelto = true;
+                    detalle.Equipo.Disponibilidad = true;
                 }
+            }
+
+            if (prestamo.PrestamoDetalles.All(d => d.Devuelto))
+            {
+                prestamo.FechaEntrada = DateTime.Now;
             }
 
             await _context.SaveChangesAsync();

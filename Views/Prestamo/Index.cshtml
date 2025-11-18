@@ -48,9 +48,24 @@
                         <ul class="list-unstyled">
                             @foreach (var detalle in prestamo.PrestamoDetalles)
                             {
-                                <li>@detalle.Equipo?.NumeroInventario - @detalle.Equipo?.Marca @detalle.Equipo?.Modelo</li>
+                                <li>
+                                    @detalle.Equipo?.NumeroInventario -
+                                    @detalle.Equipo?.Marca @detalle.Equipo?.Modelo
+                                    @if (detalle.Devuelto)
+                                    {
+                                        <span class="text-success fw-bold"> - Devuelto</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger fw-bold"> - En préstamo</span>
+                                    }
+                                </li>
                             }
                         </ul>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Sin equipos asociados</span>
                     }
                 </td>
                 <td>

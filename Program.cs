@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using NotebookApp.Areas.Identity;
 using NotebookApp.Data;
 using NotebookApp.Models;
 
@@ -12,9 +14,21 @@ var conString = builder.Configuration.GetConnectionString("Conexion") ??
 builder.Services.AddDbContext<NotebooksContext>(options =>
     options.UseSqlite(conString));
 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddErrorDescriber<CustomIdentityErrorDescriber>()
     .AddEntityFrameworkStores<NotebooksContext>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+});
 
 var app = builder.Build();
 
@@ -33,6 +47,7 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

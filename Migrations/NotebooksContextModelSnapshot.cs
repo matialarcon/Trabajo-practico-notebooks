@@ -246,12 +246,11 @@ namespace NotebookApp.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("prestamoId");
 
-                    b.Property<string>("FechaEntrada")
+                    b.Property<DateTime?>("FechaEntrada")
                         .HasColumnType("TEXT")
                         .HasColumnName("fechaEntrada");
 
-                    b.Property<string>("FechaSalida")
-                        .IsRequired()
+                    b.Property<DateTime>("FechaSalida")
                         .HasColumnType("TEXT")
                         .HasColumnName("fechaSalida");
 
@@ -272,6 +271,9 @@ namespace NotebookApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("prestamoDetalleId");
+
+                    b.Property<bool>("Devuelto")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("EquipoId")
                         .HasColumnType("INTEGER")
@@ -302,6 +304,7 @@ namespace NotebookApp.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Dni")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("DNI");
 

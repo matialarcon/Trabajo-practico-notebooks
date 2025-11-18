@@ -4,6 +4,13 @@
 
 @if (Model != null)
 {
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning">
+            @TempData["Error"]
+        </div>
+    }
+
     <div class="card shadow p-4">
         <h4>Datos del Profesor</h4>
         <p>
@@ -30,28 +37,45 @@
         <hr />
 
         <h4>Equipos retirados</h4>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>N° Inventario</th>
-                    <th>Marca</th>
-                    <th>Modelo</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var detalle in Model.PrestamoDetalles)
-                {
-                    <tr>
-                        <td>@detalle.Equipo.NumeroInventario</td>
-                        <td>@detalle.Equipo.Marca</td>
-                        <td>@detalle.Equipo.Modelo</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+
+        <div class="mb-3">
+            <input type="text" id="buscarEquipo" class="form-control" placeholder="Seleccionar equipo por número de inventario..." />
+        </div>
+
+        <div>
+            <label>
+                <input type="checkbox" id="seleccionarTodos" /> Seleccionar todos
+            </label>
+        </div>
 
         <form asp-action="Restore" method="post">
             <input type="hidden" asp-for="PrestamoId" />
+
+            <div id="mensajeBusqueda" class="alert alert-warning d-none"></div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Seleccionar</th>
+                        <th>N° Inventario</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detalle in Model.PrestamoDetalles)
+                    {
+                        <tr data-inventario="@detalle.Equipo.NumeroInventario.ToLower()">
+                            <td>
+                                <input type="checkbox" name="equiposSeleccionados" value="@detalle.Equipo.EquipoId" />
+                            </td>
+                            <td>@detalle.Equipo.NumeroInventario</td>
+                            <td>@detalle.Equipo.Marca</td>
+                            <td>@detalle.Equipo.Modelo</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
             <div class="mt-3">
                 <button type="submit" class="btn btn-success">Confirmar Devolución</button>
                 <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
@@ -62,5 +86,80 @@
 else
 {
     <p class="text-danger">No se encontró el préstamo.</p>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const inputBuscar = document.getElementById('buscarEquipo');
+        const filas = document.querySelectorAll('.table tbody tr');
+        const seleccionarTodos = document.getElementById('seleccionarTodos');
+        const mensajeBusqueda = document.getElementById('mensajeBusqueda');
+
+        inputBuscar.addEventListener('input', function () {
+            const filtro = this.value.trim().toLowerCase();
+            filas.forEach(fila => {
+                const inventario = fila.getAttribute('data-inventario');
+                fila.style.display = inventario.includes(filtro) ? '' : 'none';
+            });
+        });
+
+        inputBuscar.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const filtro = this.value.trim().toLowerCase();
+                let encontrado = false;
+                mensajeBusqueda.classList.add('d-none');
+                mensajeBusqueda.textContent = '';
+
+                if (!filtro) return;
+
+                filas.forEach(fila => {
+                    const inventario = fila.getAttribute('data-inventario');
+                    const checkbox = fila.querySelector('input[type="checkbox"]');
+
+                    if (inventario.includes(filtro)) {
+                        checkbox.checked = true;
+                        fila.classList.add('table-success');
+                        encontrado = true;
+                    }
+                    fila.style.display = '';
+                });
+
+                if (!encontrado) {
+                    mensajeBusqueda.textContent = `⚠️ No se encontró ningún equipo con el número de inventario "${this.value}".`;
+                    mensajeBusqueda.classList.remove('d-none');
+                }
+
+                this.value = '';
+            }
+        });
+
+        filas.forEach(fila => {
+            const checkbox = fila.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', function () {
+                if (this.checked) {
+                    fila.classList.add('table-success');
+                } else {
+                    fila.classList.remove('table-success');
+                }
+            });
+        });
+
+        seleccionarTodos.addEventListener('change', function () {
+            filas.forEach(fila => {
+                const checkbox = fila.querySelector('input[type="checkbox"]');
+                if (this.checked) {
+                    checkbox.checked = true;
+                    fila.classList.add('table-success');
+                }
+                else {
+                    checkbox.checked = false;
+                    fila.classList.remove('table-success');
+                }
+            });
+        });
+    </script>
 }
 

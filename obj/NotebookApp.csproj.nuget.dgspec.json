@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto final\\NotebookApp\\NotebookApp.csproj": {}
+    "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto-final\\NotebookApp\\NotebookApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto final\\NotebookApp\\NotebookApp.csproj": {
+    "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto-final\\NotebookApp\\NotebookApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto final\\NotebookApp\\NotebookApp.csproj",
+        "projectUniqueName": "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto-final\\NotebookApp\\NotebookApp.csproj",
         "projectName": "NotebookApp",
-        "projectPath": "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto final\\NotebookApp\\NotebookApp.csproj",
+        "projectPath": "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto-final\\NotebookApp\\NotebookApp.csproj",
         "packagesPath": "C:\\Users\\NoteBook\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto final\\NotebookApp\\obj\\",
+        "outputPath": "C:\\Users\\NoteBook\\OneDrive\\Documents\\Proyecto-final\\NotebookApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,6 +50,10 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.14.1, )"
+            },
             "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
               "target": "Package",
               "version": "[9.0.10, )"
@@ -100,7 +104,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

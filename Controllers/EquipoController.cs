@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NotebookApp.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Intrinsics.X86;
+using System.Threading.Tasks;
 
 namespace NotebookApp.Controllers
 {
+    [Authorize]
     public class EquipoController : Controller
     {
         private readonly NotebooksContext _context;
@@ -21,7 +24,15 @@ namespace NotebookApp.Controllers
         // GET: Equipo
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Equipos.ToListAsync());
+
+            var equipos = await _context.Equipos.ToListAsync();
+
+            ViewBag.PermitirEliminar = equipos.ToDictionary(
+                e => e.EquipoId,
+                e => _context.PrestamoDetalles.Any(p => p.EquipoId == e.EquipoId)
+            );
+
+            return View(equipos);
         }
 
         // GET: Equipo/Create
@@ -39,9 +50,20 @@ namespace NotebookApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(equipo);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var equipos = await _context.Equipos
+                    .FirstOrDefaultAsync(m => m.NumeroInventario == equipo.NumeroInventario);
+
+                if (equipos == null)
+                {
+                    _context.Add(equipo);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("", "");
+                    ViewBag.Mensaje = "❌ Ya existe un equipo registrado con ese numero de inventario.";
+                }
             }
             return View(equipo);
         }
@@ -76,21 +98,33 @@ namespace NotebookApp.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                var equipos = await _context.Equipos
+                    .FirstOrDefaultAsync(m => m.NumeroInventario == equipo.NumeroInventario && m.EquipoId != equipo.EquipoId);
+
+                if (equipos == null)
                 {
-                    _context.Update(equipo);
-                    await _context.SaveChangesAsync();
+                    try
+                    {
+                        _context.Update(equipo);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!EquipoExists(equipo.EquipoId))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!EquipoExists(equipo.EquipoId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", "");
+                    ViewBag.Mensaje = "❌ Ya existe un equipo registrado con ese numero de inventario.";
+                    return View();
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -107,6 +141,7 @@ namespace NotebookApp.Controllers
 
             var equipo = await _context.Equipos
                 .FirstOrDefaultAsync(m => m.EquipoId == id);
+
             if (equipo == null)
             {
                 return NotFound();
@@ -121,6 +156,7 @@ namespace NotebookApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var equipo = await _context.Equipos.FindAsync(id);
+
             if (equipo != null)
             {
                 _context.Equipos.Remove(equipo);

@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Index";
+    var permitirEliminar = (Dictionary<int, bool>)ViewBag.PermitirEliminar;
 }
 
 <h1>Index</h1>
@@ -9,6 +10,7 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -39,12 +41,28 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Modelo)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Disponibilidad)
-            </td>
+            @if (item.Disponibilidad)
+            {
+                 <td>
+                    Disponible
+                 </td>
+            }
+            else
+            {
+                 <td>
+                    Prestado
+                 </td>
+            }
             <td>
                 <a asp-action="Edit" asp-route-id="@item.EquipoId">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.EquipoId">Delete</a>
+                @if (permitirEliminar[item.EquipoId] == false)
+                {
+                    <a asp-action="Delete" asp-route-id="@item.EquipoId" class="btn btn-danger btn-sm">Eliminar</a>
+                }
+                else
+                {
+                    <span class="text-muted">-</span>
+                }
             </td>
         </tr>
 }

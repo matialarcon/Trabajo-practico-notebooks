@@ -34,24 +34,6 @@ namespace NotebookApp.Controllers
             return View(profesores);
         }
 
-        // GET: Profesor/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var profesor = await _context.Profesores
-                .FirstOrDefaultAsync(m => m.ProfesorId == id);
-            if (profesor == null)
-            {
-                return NotFound();
-            }
-
-            return View(profesor);
-        }
-
         // GET: Profesor/Create
         public IActionResult Create()
         {

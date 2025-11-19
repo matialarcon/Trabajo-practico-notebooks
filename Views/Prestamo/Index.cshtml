@@ -14,8 +14,8 @@
     <thead class="table-dark">
         <tr>
             <th>ID</th>
-            <th>Profesor</th>
             <th>DNI</th>
+            <th>Profesor</th>
             <th>Fecha Salida</th>
             <th>Fecha Devolución</th>
             <th>Equipos</th>
@@ -29,8 +29,8 @@
             var devuelto = prestamo.FechaEntrada != null;
             <tr>
                 <td>@prestamo.PrestamoId</td>
-                <td>@($"{prestamo.Profesor?.Nombre} {prestamo.Profesor?.Apellido}")</td>
                 <td>@prestamo.Profesor?.Dni</td>
+                <td>@($"{prestamo.Profesor?.Nombre} {prestamo.Profesor?.Apellido}")</td>
                 <td>@prestamo.FechaSalida.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>
                     @if (prestamo.FechaEntrada != null)

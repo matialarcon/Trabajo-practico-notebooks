@@ -73,7 +73,6 @@ namespace NotebookApp.Areas.Identity.Pages.Account
             var user = await _userManager.FindByEmailAsync(Input.Email);
             if (user == null)
             {
-                // No revelar si el usuario no existe
                 return RedirectToPage("./ResetPasswordConfirmation");
             }
 

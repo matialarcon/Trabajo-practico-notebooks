@@ -1,54 +1,53 @@
 ﻿@model IEnumerable<NotebookApp.Models.Profesor>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Listado de Profesores";
     var permitirEliminar = (Dictionary<int, bool>)ViewBag.PermitirEliminar;
 }
 
-<h1>Index</h1>
+<h2>Listado de Profesores</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Registrar Nuevo Profesor</a>
 </p>
-<table class="table">
-    <thead>
+
+<table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apellido)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Dni)
-            </th>
-            <th></th>
+            <th>DNI</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th style="width: 150px;">Acciones</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Apellido)
-            </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Dni)
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Dni</td>
+                <td>@item.Nombre</td>
+                <td>@item.Apellido</td>
+
+                <td class="text-center">
+                    <div class="d-flex justify-content-center gap-1">
+
+                        <a asp-action="Edit"
+                           asp-route-id="@item.ProfesorId"
+                           class="btn btn-primary btn-sm">
+                            Editar
+                        </a>
+
+                        @if (!permitirEliminar[item.ProfesorId])
+                        {
+                            <a asp-action="Delete"
+                               asp-route-id="@item.ProfesorId"
+                               class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+                        }
+                    </div>
                 </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ProfesorId">Edit</a> |
-                @if (permitirEliminar[item.ProfesorId] == false)
-                {
-                    <a asp-action="Delete" asp-route-id="@item.ProfesorId" class="btn btn-danger btn-sm">Eliminar</a>
-                }
-                else
-                {
-                    <span class="text-muted">-</span>
-                }
-            </td>
-        </tr>
-}
+            </tr>
+        }
     </tbody>
 </table>

@@ -1,70 +1,65 @@
 ﻿@model IEnumerable<NotebookApp.Models.Equipo>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Listado de Equipos";
     var permitirEliminar = (Dictionary<int, bool>)ViewBag.PermitirEliminar;
 }
 
-<h1>Index</h1>
+<h2>Listado de Equipos</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Registrar Nuevo Equipo</a>
 </p>
 
-<table class="table">
-    <thead>
+<table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.NumeroInventario)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Marca)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Modelo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Disponibilidad)
-            </th>
-            <th></th>
+            <th>N° Inventario</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Disponibilidad</th>
+            <th style="width: 150px;">Acciones</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumeroInventario)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Marca)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Modelo)
-            </td>
-            @if (item.Disponibilidad)
-            {
-                 <td>
-                    Disponible
-                 </td>
-            }
-            else
-            {
-                 <td>
-                    Prestado
-                 </td>
-            }
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.EquipoId">Edit</a> |
-                @if (permitirEliminar[item.EquipoId] == false)
-                {
-                    <a asp-action="Delete" asp-route-id="@item.EquipoId" class="btn btn-danger btn-sm">Eliminar</a>
-                }
-                else
-                {
-                    <span class="text-muted">-</span>
-                }
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.NumeroInventario</td>
+                <td>@item.Marca</td>
+                <td>@item.Modelo</td>
+
+                <td>
+                    @if (item.Disponibilidad)
+                    {
+                        <span class="badge bg-success">Disponible</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Prestado</span>
+                    }
+                </td>
+
+                <td class="text-center">
+                    <div class="d-flex justify-content-center gap-1">
+
+                        <a asp-action="Edit"
+                           asp-route-id="@item.EquipoId"
+                           class="btn btn-primary btn-sm">
+                            Editar
+                        </a>
+
+                        @if (!permitirEliminar[item.EquipoId])
+                        {
+                            <a asp-action="Delete"
+                               asp-route-id="@item.EquipoId"
+                               class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

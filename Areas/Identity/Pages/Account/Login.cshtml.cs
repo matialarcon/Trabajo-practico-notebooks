@@ -57,7 +57,6 @@ namespace NotebookApp.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
 
-            // Limpia la cookie de inicio de sesión externo para asegurar un proceso limpio
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             LoginExternos = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -72,8 +71,6 @@ namespace NotebookApp.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                // Este inicio de sesión no cuenta los errores de contraseña como intentos fallidos
-                // Para habilitar el bloqueo de cuenta tras múltiples intentos, establece lockoutOnFailure: true
                 var resultado = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
                 if (resultado.Succeeded)
@@ -96,8 +93,6 @@ namespace NotebookApp.Areas.Identity.Pages.Account
                     return Page();
                 }
             }
-
-            // Si llegamos hasta aquí, algo falló. Se vuelve a mostrar el formulario.
             return Page();
         }
     }

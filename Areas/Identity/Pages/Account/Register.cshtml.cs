@@ -124,8 +124,6 @@ namespace NotebookApp.Areas.Identity.Pages.Account
                 }
 
             }
-
-            // Si llegamos hasta aquí, algo falló; volver a mostrar el formulario.
             return Page();
         }
 

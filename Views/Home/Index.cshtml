@@ -1,8 +1,32 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mt-5">
+
+    <h1 class="display-5 fw-bold">📘 Sistema de Gestión de Préstamos</h1>
+    <p class="text-muted fs-5 mt-2">
+        Administrá profesores, equipos y préstamos de manera simple y eficiente.
+    </p>
+
+    <div class="d-flex justify-content-center gap-3 mt-4">
+
+        <a asp-controller="Profesor" asp-action="Index"
+           class="btn btn-primary btn-lg shadow-sm px-4">
+            👨‍🏫 Profesores
+        </a>
+
+        <a asp-controller="Equipo" asp-action="Index"
+           class="btn btn-success btn-lg shadow-sm px-4">
+            💻 Equipos
+        </a>
+
+        <a asp-controller="Prestamo" asp-action="Index"
+           class="btn btn-dark btn-lg shadow-sm px-4">
+            📑 Préstamos
+        </a>
+
+    </div>
+
 </div>
+
